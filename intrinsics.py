@@ -423,18 +423,19 @@ def routed_vision_set_intrinsics(vision_config, vision_device_id):
     # intrinsics_new.distortion_coeffs.p2 = 0.999999
     # intrinsics_new.distortion_coeffs.k3 = 0.001
 
-    # New values (from first matrix row/col) (Calibration Run  V2025.W11)
-    intrinsics_new.focal_length_x = 1302.90595  # From matrix[0,0]
-    intrinsics_new.focal_length_y = 1302.84746  # From matrix[1,1]
-    # New values (from matrix[0,2] and matrix[1,2]) (Calibration Run V2025.W11)
-    intrinsics_new.principal_point_x = 659.773835  # matrix[0,2]
-    intrinsics_new.principal_point_y = 247.813051  # matrix[1,2]
-    # New values (from distortion array) (Calibration Run V2025.W11)
-    intrinsics_new.distortion_coeffs.k1 = 0.01681047  # dist[0]
-    intrinsics_new.distortion_coeffs.k2 = -0.05377942  # dist[1]
-    intrinsics_new.distortion_coeffs.p1 = 0.00023870  # dist[2]
-    intrinsics_new.distortion_coeffs.p2 = -0.00052979  # dist[3]
-    intrinsics_new.distortion_coeffs.k3 = -0.369259921  # dist[4]
+    # Camera matrix values from your calibration
+    intrinsics_new.focal_length_x = 1324.58038  # matrix[0,0]
+    intrinsics_new.focal_length_y = 1320.97766  # matrix[1,1]
+    intrinsics_new.principal_point_x = 645.196528  # matrix[0,2]
+    intrinsics_new.principal_point_y = 225.297781  # matrix[1,2]
+
+    # Distortion coefficients from your calibration (OpenCV order: k1, k2, p1, p2, k3)
+    intrinsics_new.distortion_coeffs.k1 = -0.00994774168  # dist[0]
+    intrinsics_new.distortion_coeffs.k2 = 0.281289667  # dist[1]
+    intrinsics_new.distortion_coeffs.p1 = -0.000934587029  # dist[2]
+    intrinsics_new.distortion_coeffs.p2 = -0.00489698821  # dist[3]
+    intrinsics_new.distortion_coeffs.k3 = -1.21679259  # dist[4]
+
     vision_config.SetIntrinsicParameters(intrinsics_new, vision_device_id)
     print("\n** Set! **")
 
