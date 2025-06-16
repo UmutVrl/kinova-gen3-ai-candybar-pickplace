@@ -93,7 +93,7 @@ def check_for_end_or_abort(e):
     return check
 
 
-def get_camera_position_from_feedback(base_cyclic, extrinsics_read):
+def get_camera_position_from_feedback(base, base_cyclic, extrinsics_read):
     """
     Computes the camera position in the robot base (world) frame using real-time feedback.
 
@@ -189,8 +189,20 @@ def go_to_retract(base, base_cyclic):
     return finished
 
 
+def poses_are_equal(pose1, pose2, tolerance=1e-6):
+    attributes = ['x', 'y', 'z', 'rx', 'ry', 'rz']
+    for attr in attributes:
+        if abs(getattr(pose1, attr) - getattr(pose2, attr)) > tolerance:
+            return False
+    return True
+
+
 def get_camera_pose_matrix(base, base_cyclic, extrinsics_read):
+    feed = base.GetMeasuredCartesianPose()
     feedback = base_cyclic.RefreshFeedback()
+    result = poses_are_equal(feed,feedback)
+    print(result)
+
     end_effector_position = np.array([
         feedback.base.tool_pose_x,
         feedback.base.tool_pose_y,
