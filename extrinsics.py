@@ -106,7 +106,7 @@ def set_custom_extrinsics(vision_config, vision_device_id):
     # extrinsics_new.translation.t_z = 0.00002
 
     # Set translation vector based on your measurements (in meters)
-    extrinsics_new.translation.t_x = 0.00 # cm
+    extrinsics_new.translation.t_x = 0.00  # cm
     extrinsics_new.translation.t_y = 0.05639  # 5.639 cm (from user guide)
     extrinsics_new.translation.t_z = -0.00305  # 0.365 cm (from user guide)
 
