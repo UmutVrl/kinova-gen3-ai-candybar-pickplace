@@ -49,7 +49,7 @@ def main():
     # Specify the IDs of the two markers
     MARKER_ID_1 = 10  # first marker ID
     MARKER_ID_2 = 7  # second marker ID
-    MARKER_SIZE_CM = 4.4  # in cm
+    MARKER_SIZE_CM = 2.05  # in cm
 
     parser = argparse.ArgumentParser()
     args = utilities.parseConnectionArguments(parser)
