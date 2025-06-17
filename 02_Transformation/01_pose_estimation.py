@@ -43,7 +43,6 @@ def find_marker_by_id(corners, ids, target_id):
 
 
 def main():
-
     # Specify the IDs of the two markers
     MARKER_ID_1 = 10  # first marker ID
     MARKER_SIZE_CM = 2.05  # in cm
