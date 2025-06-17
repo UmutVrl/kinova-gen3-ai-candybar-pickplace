@@ -1,4 +1,4 @@
-name: KinovaGen3_01_Calibration
+name: KinovaGen3_02_Transformation
 channels:
   - defaults
 dependencies:

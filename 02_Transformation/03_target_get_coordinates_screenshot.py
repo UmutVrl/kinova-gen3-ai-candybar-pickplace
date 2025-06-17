@@ -44,7 +44,7 @@ MARKER_ID = 10  # marker ID
 MARKER_SIZE_CM = 2.05  # (centimeters)
 
 # Load camera matrix and distortion coefficients from pickle file
-with open("calibration_data.pkl", "rb") as f:
+with open("../01_calibration/calibration_data.pkl", "rb") as f:
     data = pickle.load(f)
     cameraMatrix = data['cameraMatrix']
     dist = data['dist']

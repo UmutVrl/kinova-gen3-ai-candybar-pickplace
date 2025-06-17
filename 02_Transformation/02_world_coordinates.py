@@ -36,7 +36,7 @@ TIMEOUT_DURATION = 10  # (seconds)
 BASE01_POS_X2 = 0.10  # (meters)
 
 # Load camera matrix and distortion coefficients from pickle file
-with open("calibration_data.pkl", "rb") as f:
+with open("../01_calibration/calibration_data.pkl", "rb") as f:
     data = pickle.load(f)
     cameraMatrix = data['cameraMatrix']
     dist = data['dist']
