@@ -1,7 +1,7 @@
 #########################################################################################
 #    Kinova Gen3 Robotic Arm                                                            #
 #                                                                                       #
-#    Pose Estimation with aruco markers                                      #
+#    Pose Estimation with aruco markers                                                 #
 #                                                                                       #
 #    written by: U. Vural                                                               #
 #                                                                                       #
