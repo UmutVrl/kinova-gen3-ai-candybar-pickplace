@@ -14,6 +14,7 @@
 # Python 3.11
 # Google Protobuf 3.20
 # Opencv 4.11
+# Mediapipe 0.10.10
 
 # common
 import cv2
@@ -94,10 +95,11 @@ class RTSPCameraStream:
 def load_candybar_detector():
     # Load your TFLite model (using tflite_runtime or mediapipe)
     # Load the MediaPipe Object Detector
-    base_options = python.BaseOptions(model_asset_path='Model_Test/candybar_objectdetection_model.tflite')
+    base_options = python.BaseOptions(model_asset_path='../03_MediaPipe_AI_Framework/Model'
+                                                       '/candybar_objectdetection_model.tflite')
     options = vision.ObjectDetectorOptions(base_options=base_options,
-                                           score_threshold=0.8,
-                                           max_results=1)
+                                           score_threshold=0.6,
+                                           max_results=2)
     object_detector = vision.ObjectDetector.create_from_options(options)
     return object_detector
 
@@ -117,7 +119,6 @@ def detect_candybar(frame, detector):
             label = detection.categories[0].category_name
             score = detection.categories[0].score
             cv2.putText(frame, f"{label} {score:.2f}", (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
-
 
 
 # Load camera calibration

@@ -1,15 +1,21 @@
-#########################################################################################
-#    Kinova Gen3 Robotic Arm                                                            #
-#                                                                                       #
-#    Get and transform Target coordinates                                               #
-#                                                                                       #
-#    written by: U. Vural                                                               #
-#                                                                                       #
-#                                                                                       #
-#                                                                                       #
-#    for KISS Project at Furtwangen University                                          #
-#                                                                                       #
-#########################################################################################
+##########################################################
+#    Kinova Gen3 Robotic Arm                             #
+#                                                        #
+#    Pixel_to_cm Calibration                             #
+#                                                        #
+#                                                        #
+#    written by: U. Vural                                #
+#                                                        #
+#                                                        #
+#    for KISS Project at Furtwangen University           #
+#    (06.2025)                                           #
+##########################################################
+# Kortex API 2.7.0
+# Python 3.11
+# Google Protobuf 3.20
+# Opencv 4.11
+# Mediapipe 0.10.10
+
 # common
 import cv2
 import numpy as np
@@ -17,6 +23,9 @@ import argparse
 import pickle
 import threading
 import time
+import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 from scipy.spatial.transform import Rotation as R
 
 # kinova
@@ -33,9 +42,13 @@ import utilities
 import intrinsics
 import extrinsics
 
+# GLOBAL VARIABLES
 # KINOVA
 TIMEOUT_DURATION = 10  # (seconds)
-BASE01_POS_X2 = 0.10  # (meters)
+BASE01_POS_X = 0.10  # (meters)
+BASE01_POS_Z = 0.40  # (meters)
+BASE01_ANG_X = 90  # (degrees)
+
 # Object Position (pixel)
 OBJECT_X = 640
 OBJECT_Y = 360
@@ -43,13 +56,62 @@ OBJECT_Y = 360
 MARKER_ID = 10  # marker ID
 MARKER_SIZE_CM = 2.05  # (centimeters)
 
+
 # Load camera matrix and distortion coefficients from pickle file
 with open("../01_calibration/calibration_data.pkl", "rb") as f:
     data = pickle.load(f)
-    cameraMatrix = data['cameraMatrix']
-    dist = data['dist']
-print(cameraMatrix)
-print(dist)
+    camera_matrix = data['cameraMatrix']
+    dist_coeff = data['dist']
+
+
+class RTSPCameraStream:
+    def __init__(self, rtsp_url):
+        self.rtsp_url = rtsp_url
+        self.cap = None
+        self.frame = None
+        self.stopped = True
+        self.lock = threading.Lock()
+        self.thread = None
+
+    def start(self):
+        if not self.stopped:
+            return  # Already running
+        self.stopped = False
+        self.cap = cv2.VideoCapture(self.rtsp_url, cv2.CAP_FFMPEG)
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self.thread = threading.Thread(target=self.update, daemon=True)
+        self.thread.start()
+
+    def update(self):
+        while not self.stopped:
+            if self.cap is not None and self.cap.isOpened():
+                ret, frame = self.cap.read()
+                if ret and frame is not None:
+                    with self.lock:
+                        self.frame = frame
+                else:
+                    # Try to reconnect if frame not received
+                    self.cap.release()
+                    time.sleep(1)
+                    self.cap = cv2.VideoCapture(self.rtsp_url, cv2.CAP_FFMPEG)
+            else:
+                time.sleep(1)
+                self.cap = cv2.VideoCapture(self.rtsp_url, cv2.CAP_FFMPEG)
+        if self.cap is not None:
+            self.cap.release()
+
+    def read(self):
+        with self.lock:
+            return self.frame.copy() if self.frame is not None else None
+
+    def stop(self):
+        self.stopped = True
+        if self.thread is not None:
+            self.thread.join()
+        if self.cap is not None:
+            self.cap.release()
+
+
 
 
 # Create closure to set an event after an END or an ABORT
@@ -73,6 +135,7 @@ def check_for_sequence_end_or_abort(e):
         elif event_id == Base_pb2.SEQUENCE_COMPLETED:
             print("Sequence completed.")
             e.set()
+
     return check
 
 
@@ -84,46 +147,17 @@ def check_for_end_or_abort(e):
     e -- event to signal when the action is completed
         (will be set when an END or ABORT occurs)
     """
+
     def check(notification, e=e):
         print("EVENT : " + Base_pb2.ActionEvent.Name(notification.action_event))
         if notification.action_event == Base_pb2.ACTION_END or notification.action_event == Base_pb2.ACTION_ABORT:
             e.set()
+
     return check
 
 
-def get_camera_pose_matrix(base, extrinsics_read):
-    feed = base.GetMeasuredCartesianPose()
-
-    end_effector_position = np.array([
-        feed.x,
-        feed.y,
-        feed.z
-    ])
-    rx = feed.theta_x
-    ry = feed.theta_y
-    rz = feed.theta_z
-    EE_rotation_matrix = R.from_euler('xyz', [rx, ry, rz], degrees=True).as_matrix()
-    extrinsic_translation = np.array([
-        extrinsics_read.translation.t_x,
-        extrinsics_read.translation.t_y,
-        extrinsics_read.translation.t_z
-    ])
-    camera_offset_world = EE_rotation_matrix @ extrinsic_translation
-    camera_position = end_effector_position + camera_offset_world
-
-    print("EE orientation (deg):", rx, ry, rz)
-    print("Rotation matrix (ZYX):\n", R.from_euler('zyx', [rz, ry, rx], degrees=True).as_matrix())
-    print("Rotation matrix (XYZ):\n", R.from_euler('xyz', [rx, ry, rz], degrees=True).as_matrix())
-
-    # Build 4x4 pose
-    camera_pose = np.eye(4)
-    camera_pose[:3, :3] = EE_rotation_matrix
-    camera_pose[:3, 3] = camera_position
-    print("Camera position in world frame:", camera_pose)
-    return camera_pose
-
-
-def get_marker_pose_in_world(frame, marker_id, marker_size, camera_matrix, dist_coeff, camera_pose):
+def get_xy_pixel_cm_ratio(frame, marker_id, marker_size, camera_matrix, dist_coeff,
+                          save_path="pixel_to_cm_calibration.pkl"):
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
     parameters = cv2.aruco.DetectorParameters()
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
@@ -140,21 +174,29 @@ def get_marker_pose_in_world(frame, marker_id, marker_size, camera_matrix, dist_
             print(f"Marker {marker_id} not found in this frame.")
             return None, None
 
-        marker_tvec = tvecs[idx][0]  # (x, y, z) in camera frame
-        marker_rvec = rvecs[idx][0]  # rotation vector
-        # Convert rvec to rotation matrix
-        marker_rmat, _ = cv2.Rodrigues(marker_rvec)
-        # Build 4x4 marker pose in camera frame
-        marker_in_camera = np.eye(4)
-        marker_in_camera[:3, :3] = marker_rmat
-        # Sign flip (OpenCV vs World):
-        marker_in_camera[:3, 3] = [-marker_tvec[0], -marker_tvec[1], marker_tvec[2]]
-        # Chain with camera pose in world frame
-        marker_in_world = camera_pose @ marker_in_camera
-        # Extract world coordinates for robot
-        object_world_position = marker_in_world[:3, 3]
-        print(f"Marker position in world frame: {object_world_position}")
-        return object_world_position, marker_in_world
+        # Use the corners of the detected marker
+        marker_corners = corners[idx][0]  # (4,2) array
+
+        # Calculate side lengths in pixels
+        top = np.linalg.norm(marker_corners[0] - marker_corners[1])
+        right = np.linalg.norm(marker_corners[1] - marker_corners[2])
+        bottom = np.linalg.norm(marker_corners[2] - marker_corners[3])
+        left = np.linalg.norm(marker_corners[3] - marker_corners[0])
+
+        # Average x (horizontal) and y (vertical) side lengths
+        x_px = (top + bottom) / 2
+        y_px = (left + right) / 2
+        x_ratio = x_px / marker_size
+        y_ratio = y_px / marker_size
+
+        # Save to pickle file
+        calib_data = {'x_ratio': x_ratio, 'y_ratio': y_ratio}
+        with open(save_path, "wb") as f:
+            pickle.dump(calib_data, f)
+        print(f"Saved calibration: x_ratio={x_ratio:.4f}, y_ratio={y_ratio:.4f} to {save_path}")
+
+        return x_ratio, y_ratio
+
     else:
         print(f"No markers found in this frame.")
         return None, None
@@ -189,84 +231,59 @@ def go_to_retract(base, base_cyclic):
     base.Unsubscribe(notification_handle)
 
     # Get robot pose
-    feedback = base_cyclic.RefreshFeedback()
-    current_pose = [
-        feedback.base.tool_pose_x,
-        feedback.base.tool_pose_y,
-        feedback.base.tool_pose_z,
-        feedback.base.tool_pose_theta_x,
-        feedback.base.tool_pose_theta_y,
-        feedback.base.tool_pose_theta_z
-    ]
+    # feedback = base_cyclic.RefreshFeedback()
+    # current_pose = [
+    #    feedback.base.tool_pose_x,
+    #    feedback.base.tool_pose_y,
+    #    feedback.base.tool_pose_z,
+    #    feedback.base.tool_pose_theta_x,
+    #    feedback.base.tool_pose_theta_y,
+    #    feedback.base.tool_pose_theta_z
+    # ]
 
     if finished:
         print("Retract position reached\n")
         # Print the pose information
-        print(f"  Position: X={current_pose[0]:.3f}, Y={current_pose[1]:.3f}, Z={current_pose[2]:.3f}")
-        print(f"  Orientation: Rx={current_pose[3]:.3f}, Ry={current_pose[4]:.3f}, Rz={current_pose[5]:.3f}")
-        print("--------------------")
+        # print(f"  Position: X={current_pose[0]:.3f}, Y={current_pose[1]:.3f}, Z={current_pose[2]:.3f}")
+        # print(f"  Orientation: Rx={current_pose[3]:.3f}, Ry={current_pose[4]:.3f}, Rz={current_pose[5]:.3f}")
+        # print("--------------------")
     else:
         print("Timeout on action notification wait\n")
     return finished
 
 
-def go_to_start_position(base, base_cyclic, object_in_robot):
-    pass  # LOOK LATER
+def go_to_start(base, base_cyclic, pos_x, pos_z, ang_x):  # cartesian_action
+    print("Starting Cartesian action movement to go to Pickup location ...")
+    action = Base_pb2.Action()
+    feedback = base_cyclic.RefreshFeedback()
 
+    cartesian_pose = action.reach_pose.target_pose
+    cartesian_pose.x = feedback.base.tool_pose_x + pos_x  # (meters)
+    cartesian_pose.y = feedback.base.tool_pose_y   # (meters)
+    cartesian_pose.z = feedback.base.tool_pose_z + pos_z  # (meters)
+    cartesian_pose.theta_x = feedback.base.tool_pose_theta_x + ang_x  # (degrees)
+    cartesian_pose.theta_y = feedback.base.tool_pose_theta_y  # (degrees)
+    cartesian_pose.theta_z = feedback.base.tool_pose_theta_z  # (degrees)
 
-def go_to_target_position(base, base_cyclic, object_in_robot):
-    pass  # LOOK LATER
+    e = threading.Event()
+    notification_handle = base.OnNotificationActionTopic(
+        check_for_end_or_abort(e),
+        Base_pb2.NotificationOptions()
+    )
 
+    print("Executing action")
+    base.ExecuteAction(action)
 
-def print_all_poses(feed, camera_pose, marker_pos, marker_rot=None):
-    # End-Effector
-    print("End-Effector Position (m):")
-    print(f"  X = {feed.x:.3f}")
-    print(f"  Y = {feed.y:.3f}")
-    print(f"  Z = {feed.z:.3f}")
-    print("End-Effector Orientation (deg):")
-    print(f"  Rx = {feed.theta_x:.3f}")
-    print(f"  Ry = {feed.theta_y:.3f}")
-    print(f"  Rz = {feed.theta_z:.3f}")
-    print("-" * 40)
+    print("Waiting for movement to finish ...")
+    finished = e.wait(TIMEOUT_DURATION)
+    time.sleep(0)
+    base.Unsubscribe(notification_handle)
 
-    # Camera
-    print("Camera Position (m):")
-    print(f"  X = {camera_pose[0,3]:.3f}")
-    print(f"  Y = {camera_pose[1,3]:.3f}")
-    print(f"  Z = {camera_pose[2,3]:.3f}")
-    # Extract Euler angles from rotation matrix (assuming 'zyx' order, degrees)
-    cam_rot = R.from_matrix(camera_pose[:3,:3]).as_euler('zyx', degrees=True)  # check
-    print("Camera Orientation (deg):")
-    print(f"  Rx = {cam_rot[2]:.3f}")
-    print(f"  Ry = {cam_rot[1]:.3f}")
-    print(f"  Rz = {cam_rot[0]:.3f}")
-    print("-" * 40)
-
-    # Marker
-    print("Marker Position (m):")
-    print(f"  X = {marker_pos[0]:.3f}")
-    print(f"  Y = {marker_pos[1]:.3f}")
-    print(f"  Z = {marker_pos[2]:.3f}")
-    if marker_rot is not None:
-        print("Marker Orientation (deg):")
-        print(f"  Rx = {marker_rot[0]:.3f}")
-        print(f"  Ry = {marker_rot[1]:.3f}")
-        print(f"  Rz = {marker_rot[2]:.3f}")
-    print("-" * 40)
-
-
-def take_screenshot(rtsp_url="rtsp://192.168.1.10/color", retries=3):
-    for _ in range(retries):
-        cap = cv2.VideoCapture(rtsp_url)
-        if cap.isOpened():
-            ret, frame = cap.read()
-            cap.release()
-            if ret and frame is not None:
-                return frame
-        time.sleep(1)
-    print("Failed to capture frame after retries.")
-    return None
+    if finished:
+        print("Pickup location reached\n")
+    else:
+        print("Timeout on action notification wait\n")
+    return finished
 
 
 def main():
@@ -310,27 +327,33 @@ def main():
             print(f"FRAME_WIDTH: {frame_width}")
             print(f"FRAME_HEIGHT: {frame_height}")
 
+        stream = RTSPCameraStream("rtsp://192.168.1.10/color")
+        stream.start()
         try:
+            display_enabled = True
             while True:
                 go_to_retract(base, base_cyclic)
                 time.sleep(2)
-                frame = take_screenshot()
+                frame = stream.read()
                 if frame is not None:
-                    camera_pose = get_camera_pose_matrix(base, extrinsics_read)
-                    object_world_position, marker_in_world = get_marker_pose_in_world(
-                        frame,
-                        MARKER_ID,
-                        MARKER_SIZE_CM / 100,
-                        cameraMatrix,
-                        dist,
-                        camera_pose
-                    )
-                    print_all_poses(feed, camera_pose, object_world_position, marker_rot=None)
-                    if object_world_position is not None:
-                        go_to_target_position(base, base_cyclic, object_world_position)
-                time.sleep(1)
+
+                    if display_enabled:
+                        cv2.imshow("RTSP Stream", frame)
+                        time.sleep(2)
+                        go_to_start(base, base_cyclic, BASE01_POS_X, -BASE01_POS_Z, BASE01_ANG_X)
+                        time.sleep(2)
+                        fresh_frame = stream.read()
+                        get_xy_pixel_cm_ratio(fresh_frame, MARKER_ID, MARKER_SIZE_CM, camera_matrix, dist_coeff,
+                                              save_path="pixel_to_cm_calibration.pkl")
+
+                        if cv2.waitKey(1) & 0xFF == 27:
+                            display_enabled = False
+                            cv2.destroyWindow("RTSP Stream")
         except KeyboardInterrupt:
             pass
+        finally:
+            stream.stop()
+            cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
