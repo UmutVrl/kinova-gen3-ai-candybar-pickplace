@@ -45,17 +45,15 @@ import extrinsics
 # GLOBAL VARIABLES
 # KINOVA
 TIMEOUT_DURATION = 10  # (seconds)
-BASE01_POS_X = 0.10  # (meters)
-BASE01_POS_Z = 0.40  # (meters)
-BASE01_ANG_X = 90  # (degrees)
+BASE01_POS_X = 0.20  # (meters)
+BASE01_POS_Z = -0.10  # (meters)
 
 # Object Position (pixel)
 OBJECT_X = 640
 OBJECT_Y = 360
 # ARUCO
 MARKER_ID = 10  # marker ID
-MARKER_SIZE_CM = 2.05  # (centimeters)
-
+MARKER_SIZE_CM = 4.45  # (centimeters)
 
 # Load camera matrix and distortion coefficients from pickle file
 with open("../01_calibration/calibration_data.pkl", "rb") as f:
@@ -110,8 +108,6 @@ class RTSPCameraStream:
             self.thread.join()
         if self.cap is not None:
             self.cap.release()
-
-
 
 
 # Create closure to set an event after an END or an ABORT
@@ -252,16 +248,16 @@ def go_to_retract(base, base_cyclic):
     return finished
 
 
-def go_to_start(base, base_cyclic, pos_x, pos_z, ang_x):  # cartesian_action
+def go_to_start(base, base_cyclic, pos_x, pos_z):  # cartesian_action
     print("Starting Cartesian action movement to go to Pickup location ...")
     action = Base_pb2.Action()
     feedback = base_cyclic.RefreshFeedback()
 
     cartesian_pose = action.reach_pose.target_pose
     cartesian_pose.x = feedback.base.tool_pose_x + pos_x  # (meters)
-    cartesian_pose.y = feedback.base.tool_pose_y   # (meters)
+    cartesian_pose.y = feedback.base.tool_pose_y  # (meters)
     cartesian_pose.z = feedback.base.tool_pose_z + pos_z  # (meters)
-    cartesian_pose.theta_x = feedback.base.tool_pose_theta_x + ang_x  # (degrees)
+    cartesian_pose.theta_x = feedback.base.tool_pose_theta_x  # (degrees)
     cartesian_pose.theta_y = feedback.base.tool_pose_theta_y  # (degrees)
     cartesian_pose.theta_z = feedback.base.tool_pose_theta_z  # (degrees)
 
@@ -333,15 +329,15 @@ def main():
             display_enabled = True
             while True:
                 go_to_retract(base, base_cyclic)
-                time.sleep(2)
+                time.sleep(3)
                 frame = stream.read()
                 if frame is not None:
 
                     if display_enabled:
                         cv2.imshow("RTSP Stream", frame)
-                        time.sleep(2)
-                        go_to_start(base, base_cyclic, BASE01_POS_X, -BASE01_POS_Z, BASE01_ANG_X)
-                        time.sleep(2)
+                        time.sleep(3)
+                        go_to_start(base, base_cyclic, BASE01_POS_X, BASE01_POS_Z)  # dz = 45.89 cm
+                        time.sleep(3)
                         fresh_frame = stream.read()
                         get_xy_pixel_cm_ratio(fresh_frame, MARKER_ID, MARKER_SIZE_CM, camera_matrix, dist_coeff,
                                               save_path="pixel_to_cm_calibration.pkl")

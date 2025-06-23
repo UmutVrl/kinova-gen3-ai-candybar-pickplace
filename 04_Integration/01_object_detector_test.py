@@ -99,7 +99,7 @@ def load_candybar_detector():
                                                        '/candybar_objectdetection_model.tflite')
     options = vision.ObjectDetectorOptions(base_options=base_options,
                                            score_threshold=0.6,
-                                           max_results=2)
+                                           max_results=1)
     object_detector = vision.ObjectDetector.create_from_options(options)
     return object_detector
 
