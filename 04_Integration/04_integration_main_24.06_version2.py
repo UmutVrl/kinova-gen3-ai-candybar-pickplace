@@ -1,13 +1,11 @@
 ##########################################################
-#    Kinova Gen3 Robotic Arm                             #
+#    Kinova Gen3 Robotic Arm Control                     #
 #                                                        #
-#    Integration Main                                    #
+#    Integration Main  (Project Candydbar)               #
 #                                                        #
+#    written by: Umut Can Vural                          #
 #                                                        #
-#    written by: U. Vural                                #
-#                                                        #
-#                                                        #
-#    for KISS Project at Furtwangen University           #
+#    for KISS Project @ Furtwangen University            #
 #    (06.2025)                                           #
 ##########################################################
 # Kortex API 2.7.0
@@ -36,23 +34,20 @@ from kortex_api.autogen.client_stubs.BaseClientRpc import BaseClient
 from kortex_api.autogen.messages import Base_pb2
 from kortex_api.autogen.client_stubs.BaseCyclicClientRpc import BaseCyclicClient
 from kortex_api.autogen.client_stubs.DeviceManagerClientRpc import DeviceManagerClient
-from kortex_api.autogen.client_stubs.DeviceConfigClientRpc import DeviceConfigClient
 from kortex_api.autogen.client_stubs.VisionConfigClientRpc import VisionConfigClient
 
 # local
-import utilities
 import intrinsics
 import extrinsics
+import utilities
 
 # GLOBAL VARIABLES
 # KINOVA
 TIMEOUT_DURATION = 10  # (seconds)
 BASE01_POS_X = 0.20  # (meters)
 BASE01_POS_Z = 0.10  # (meters) (dz= 45.89 cm appr.)
-# TARGET
+# TARGET DEPTH
 TARGET_POS_Z = 0.30  # (meters)
-TARGET_POS_X = None
-TARGET_POS_Y = None
 # GRIPPER
 GRIPPER_POS_01 = 0.00  # gripper full open
 GRIPPER_POS_02 = 0.60  # gripper close (width = X.X cm appr.)
@@ -60,6 +55,7 @@ GRIPPER_POS_02 = 0.60  # gripper close (width = X.X cm appr.)
 TABLE_HEIGHT = 0.0  # Table surface Z in robot base frame (meters)
 Z_TOLERANCE = 0.02  # Acceptable deviation from table (meters, e.g., 2 cm)
 
+# CALIBRATION
 with open("pixel_to_cm_calibration.pkl", "rb") as f:
     calib = pickle.load(f)
     x_ratio = calib['x_ratio']
@@ -71,6 +67,7 @@ with open("../01_calibration/calibration_data.pkl", "rb") as f:
     camera_matrix = calib['cameraMatrix']
     dist_coeff = calib['dist']
 
+# LOGGING
 logging.basicConfig(
     level=logging.INFO,
     format='[%(processName)s] %(levelname)s: %(message)s'
@@ -198,33 +195,14 @@ def get_camera_pose_matrix(base, extrinsics_read):
     return camera_pose
 
 
-def get_candybar_center(frame, detector):
-    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    detection_result = detector.detect(mp_image)
-    centers = []
-    for detection in detection_result.detections:
-        bbox = detection.bounding_box
-        x1, y1 = int(bbox.origin_x), int(bbox.origin_y)
-        x2, y2 = x1 + int(bbox.width), y1 + int(bbox.height)
-        # Calculate center
-        cx = x1 + int(bbox.width // 2)
-        cy = y1 + int(bbox.height // 2)
-        centers.append((cx, cy))
-    return centers  # List of centers for all detected objects
-
-
-def get_object_offset_cm(frame, detector, x_ratio, y_ratio):
-    centers = get_candybar_center(frame, detector)
+def get_object_offset_cm(frame, center_x, center_y, x_ratio, y_ratio):
     frame_height, frame_width = frame.shape[:2]
     image_center = (frame_width // 2, frame_height // 2)
-    offsets_cm = []
-    for (cx, cy) in centers:
-        dx_pixels = cx - image_center[0]
-        dy_pixels = cy - image_center[1]
-        dx_cm = dx_pixels / x_ratio
-        dy_cm = dy_pixels / y_ratio
-        offsets_cm.append((dx_cm, dy_cm))
-    return offsets_cm  # List of (dx_cm, dy_cm) for each detected object
+    dx_pixels = center_x - image_center[0]
+    dy_pixels = center_y - image_center[1]
+    dx_cm = dx_pixels / x_ratio
+    dy_cm = dy_pixels / y_ratio
+    return dx_cm, dy_cm
 
 
 def go_to_retract(base, base_cyclic):
@@ -291,40 +269,6 @@ def go_to_start(base, base_cyclic, pos_x, pos_z):  # cartesian_action
 
     if finished:
         print("Start location reached\n")
-    else:
-        print("Timeout on action notification wait\n")
-    return finished
-
-
-def go_to_target(base, base_cyclic, pos_x, pos_y, pos_z):
-    print("Starting Cartesian action movement to go to Pickup location ...")
-    action = Base_pb2.Action()
-    feedback = base_cyclic.RefreshFeedback()
-
-    cartesian_pose = action.reach_pose.target_pose
-    cartesian_pose.x = feedback.base.tool_pose_x + pos_x  # (meters)
-    cartesian_pose.y = feedback.base.tool_pose_y + pos_y  # (meters)
-    cartesian_pose.z = feedback.base.tool_pose_z + pos_z  # (meters)
-    cartesian_pose.theta_x = feedback.base.tool_pose_theta_x  # (degrees)
-    cartesian_pose.theta_y = feedback.base.tool_pose_theta_y  # (degrees)
-    cartesian_pose.theta_z = feedback.base.tool_pose_theta_z  # (degrees)
-
-    e = threading.Event()
-    notification_handle = base.OnNotificationActionTopic(
-        check_for_end_or_abort(e),
-        Base_pb2.NotificationOptions()
-    )
-
-    print("Executing action")
-    base.ExecuteAction(action)
-
-    print("Waiting for movement to finish ...")
-    finished = e.wait(TIMEOUT_DURATION)
-    time.sleep(0)
-    base.Unsubscribe(notification_handle)
-
-    if finished:
-        print("Pickup location reached\n")
     else:
         print("Timeout on action notification wait\n")
     return finished
@@ -499,7 +443,6 @@ def process_stream(rtsp_url, shared):
     logging.info("Stream process ended.")
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     args = utilities.parseConnectionArguments(parser)
@@ -509,8 +452,8 @@ def main():
         vision_config = VisionConfigClient(router)
         base = BaseClient(router)
         base_cyclic = BaseCyclicClient(router)
-        #feed = base.GetMeasuredCartesianPose()
-        #detector = load_candybar_detector()
+        # feed = base.GetMeasuredCartesianPose()
+        # detector = load_candybar_detector()
 
         vision_device_id = intrinsics.get_vision_device_id(device_manager)
         print(f"Vision Device ID: {vision_device_id}")
@@ -558,57 +501,66 @@ def main():
         time.sleep(0.5)
         display_proc.start()
         time.sleep(0.5)
-        detect_proc.start()
-        time.sleep(3)
+        logging.info("Do not close the display until prompted to do so.")
 
-        go_to_retract(base, base_cyclic)
+        go_to_retract(base, base_cyclic)  # go to default base
         time.sleep(1)
         gripper_control(base, 0.3, 0.1, 0.1)
         time.sleep(0.5)
 
-        go_to_start(base, base_cyclic, BASE01_POS_X, BASE01_POS_Z)
+        go_to_start(base, base_cyclic, BASE01_POS_X, BASE01_POS_Z)  # go to starting base
         time.sleep(5)
+        detect_proc.start()  # start object detection
+        time.sleep(3)
 
         try:
-            last_detection_time = time.time()
-            timeout_seconds = 20
+            detection_timeout = 10  # seconds
+            start_time = time.time()
+            detected = False
 
-            while True:
+            while time.time() - start_time < detection_timeout:
                 if shared['new_detection']:
                     center_x, center_y = shared['detection_data']
-                    print(f"center coordinates X: {center_x}, Y= {center_y}")
-                    logging.info("MOVING THE ROBOT")
-                    # Move robot to (center_x, center_y)
+                    print(f"center coordinates X: {center_x}, Y: {center_y}")
                     shared['new_detection'] = False
-                    last_detection_time = time.time()  # Reset timer on detection
+                    detected = True
 
-                # Check for timeout
-                if time.time() - last_detection_time > timeout_seconds:
-                    print("No detection for 20 seconds, going to retract position.")
-                    go_to_retract(base, base_cyclic)
+                    # Convert pixel coordinates to real-world offsets
+                    frame = shared['detected_frame']
+                    TARGET_POS_X, TARGET_POS_Y = get_object_offset_cm(frame, center_x, center_y, x_ratio, y_ratio)
+                    # Build homogeneous target_cam vector
+                    target_cam = np.array([TARGET_POS_X, TARGET_POS_Y, TARGET_POS_Z, 1])
+                    print(f"target vector : {target_cam}")
                     break
-
                 time.sleep(0.05)
-        except KeyboardInterrupt:
-            print("Exiting...")
 
-        go_to_retract(base, base_cyclic)
-        time.sleep(1)
-        gripper_control(base, 0.7, 0.1, 0.1)
-        time.sleep(0.5)
-        logging.info("Session ended. Press ESC to close Display")
+            if detected and target_cam is not None:
+                # Move robot to detected location
+                print("OBJECT IS DETECTED")
+                move_ee_to_camera_target(base, base_cyclic, extrinsics_read, target_cam, TIMEOUT_DURATION)
+            else:
+                print("No detection in 10 seconds, returning to retract position.")
+                go_to_retract(base, base_cyclic)
 
-        display_proc.join()  # Wait for display window to close (ESC)
-        shared['exit'] = True
-        detect_proc.join()
-        stream_proc.join()
+        finally:
+            # This ensures cleanup happens even if an exception occurs
+            shared['exit'] = True
+            detect_proc.join()
+            go_to_retract(base, base_cyclic)
+            time.sleep(1)
+            gripper_control(base, 0.7, 0.1, 0.1)
+            time.sleep(0.5)
 
-        # Prompt the user to press 'q' to exit
-        while True:
-            user_input = input("Press 'q' and Enter to quit the program: ")
-            if user_input.strip().lower() == 'q':
-                print("Program terminated.")
-                break
+            logging.info("Session ended. Press ESC to close Display")
+            display_proc.join()  # Wait for display window to close (ESC)
+            stream_proc.join()
+
+            # Prompt the user to press 'q' to exit
+            while True:
+                user_input = input("Press 'q' and Enter to quit the program: ")
+                if user_input.strip().lower() == 'q':
+                    print("Program terminated.")
+                    break
 
 
 if __name__ == "__main__":
