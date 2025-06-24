@@ -47,7 +47,7 @@ TIMEOUT_DURATION = 10  # (seconds)
 BASE01_POS_X = 0.20  # (meters)
 BASE01_POS_Z = 0.10  # (meters) (dz= 45.89 cm appr.)
 # TARGET DEPTH
-TARGET_POS_Z = 0.30  # (meters)
+TARGET_POS_Z = 0.285  # (meters)
 # GRIPPER
 GRIPPER_POS_01 = 0.00  # gripper full open
 GRIPPER_POS_02 = 0.60  # gripper close (width = X.X cm appr.)
@@ -196,12 +196,25 @@ def get_camera_pose_matrix(base, extrinsics_read):
 
 
 def get_object_offset_cm(frame, center_x, center_y, x_ratio, y_ratio):
+    # IMPORTANT #
+    # There is amn alighment issue taht we have to chect the signatures of x and y axis
+    # (as we did before with aruco tvecs)
     frame_height, frame_width = frame.shape[:2]
     image_center = (frame_width // 2, frame_height // 2)
+
+    # Calculate pixel offsets
     dx_pixels = center_x - image_center[0]
     dy_pixels = center_y - image_center[1]
+
+    print(f"Raw pixel offsets: dx={dx_pixels}, dy={dy_pixels}")
+
+    # Apply sign correction for robotics coordinates:
+    # - Keep X sign (right = positive)
+    # - Invert Y sign (up = positive)
     dx_cm = dx_pixels / x_ratio
-    dy_cm = dy_pixels / y_ratio
+    dy_cm = -dy_pixels / y_ratio  # Invert Y sign
+
+    print(f"Corrected cm offsets: dx={dx_cm:.3f}, dy={dy_cm:.3f}")
     return dx_cm, dy_cm
 
 
@@ -315,7 +328,7 @@ def load_candybar_detector():
     base_options = python.BaseOptions(model_asset_path='../03_MediaPipe_AI_Framework/Model'
                                                        '/candybar_objectdetection_model.tflite')
     options = vision.ObjectDetectorOptions(base_options=base_options,
-                                           score_threshold=0.8,
+                                           score_threshold=0.7,
                                            max_results=1)  # Number of detected object, should be 1
     object_detector = vision.ObjectDetector.create_from_options(options)
     return object_detector
@@ -330,15 +343,16 @@ def move_ee_to_camera_target(base, base_cyclic, extrinsics_read, target_cam, TIM
         extrinsics_read.translation.t_y,
         extrinsics_read.translation.t_z
     ])
+    print(f"cam to EE: {cam_to_ee}")
     ee_target_position = target_base[:3] - EE_rotation_matrix @ cam_to_ee
 
     # Print security check before movement
-    print_target_coordinates(target_base, ee_target_position)
+    print_target_coordinates(base, camera_pose, target_base, ee_target_position)
 
     action = Base_pb2.Action()
     cartesian_pose = action.reach_pose.target_pose
     cartesian_pose.x = float(ee_target_position[0])
-    cartesian_pose.y = float(ee_target_position[1])
+    cartesian_pose.y = -float(ee_target_position[1])  # IMPORTANT. Signature Change
     cartesian_pose.z = float(ee_target_position[2])
     feedback = base_cyclic.RefreshFeedback()
     cartesian_pose.theta_x = feedback.base.tool_pose_theta_x
@@ -364,7 +378,31 @@ def move_ee_to_camera_target(base, base_cyclic, extrinsics_read, target_cam, TIM
     return finished
 
 
-def print_target_coordinates(target_base, ee_target_position):
+def print_target_coordinates(base, camera_pose, target_base, ee_target_position):
+    feed = base.GetMeasuredCartesianPose()
+    # End-Effector
+    print("End-Effector Position (m):")
+    print(f"  X = {feed.x:.3f}")
+    print(f"  Y = {feed.y:.3f}")
+    print(f"  Z = {feed.z:.3f}")
+    print("End-Effector Orientation (deg):")
+    print(f"  Rx = {feed.theta_x:.3f}")
+    print(f"  Ry = {feed.theta_y:.3f}")
+    print(f"  Rz = {feed.theta_z:.3f}")
+    print("-" * 40)
+
+    # Camera
+    print("Camera Position (m):")
+    print(f"  X = {camera_pose[0, 3]:.3f}")
+    print(f"  Y = {camera_pose[1, 3]:.3f}")
+    print(f"  Z = {camera_pose[2, 3]:.3f}")
+    cam_rot = R.from_matrix(camera_pose[:3, :3]).as_euler('xyz', degrees=True)  # check
+    print("Camera Orientation (deg):")
+    print(f"  Rx = {cam_rot[2]:.3f}")
+    print(f"  Ry = {cam_rot[1]:.3f}")
+    print(f"  Rz = {cam_rot[0]:.3f}")
+    print("-" * 40)
+
     print("\n[SECURITY CHECK] Planned Movement:")
     print(
         f"  Target (object) position in robot base frame: X={target_base[0]:.3f}, Y={target_base[1]:.3f}, Z={target_base[2]:.3f}")
@@ -502,6 +540,8 @@ def main():
         display_proc.start()
         time.sleep(0.5)
         logging.info("Do not close the display until prompted to do so.")
+        detect_proc.start()  # start object detection
+        time.sleep(3)
 
         go_to_retract(base, base_cyclic)  # go to default base
         time.sleep(1)
@@ -509,9 +549,7 @@ def main():
         time.sleep(0.5)
 
         go_to_start(base, base_cyclic, BASE01_POS_X, BASE01_POS_Z)  # go to starting base
-        time.sleep(5)
-        detect_proc.start()  # start object detection
-        time.sleep(3)
+        time.sleep(10)
 
         try:
             detection_timeout = 10  # seconds
@@ -527,7 +565,10 @@ def main():
 
                     # Convert pixel coordinates to real-world offsets
                     frame = shared['detected_frame']
-                    TARGET_POS_X, TARGET_POS_Y = get_object_offset_cm(frame, center_x, center_y, x_ratio, y_ratio)
+                    dx_cm, dy_cm = get_object_offset_cm(frame, center_x, center_y, x_ratio, y_ratio)
+                    # If ratios are in pixels/meter:
+                    TARGET_POS_X = dx_cm / 100  # Convert cm to meters
+                    TARGET_POS_Y = dy_cm / 100
                     # Build homogeneous target_cam vector
                     target_cam = np.array([TARGET_POS_X, TARGET_POS_Y, TARGET_POS_Z, 1])
                     print(f"target vector : {target_cam}")
@@ -535,9 +576,15 @@ def main():
                 time.sleep(0.05)
 
             if detected and target_cam is not None:
+
                 # Move robot to detected location
                 print("OBJECT IS DETECTED")
+                #gripper_control(base, 0.7, 0.1, 0.1)  # detection warning
+                gripper_control(base, 0.3, 0.1, 0.1)
+                time.sleep(5)
                 move_ee_to_camera_target(base, base_cyclic, extrinsics_read, target_cam, TIMEOUT_DURATION)
+                time.sleep(10)
+                gripper_control(base, 0.7, 0.1, 0.1)
             else:
                 print("No detection in 10 seconds, returning to retract position.")
                 go_to_retract(base, base_cyclic)
