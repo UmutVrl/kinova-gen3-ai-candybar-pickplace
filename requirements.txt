@@ -9,7 +9,7 @@ fonttools==4.58.4
 jax==0.6.1
 jaxlib==0.6.1
 kiwisolver==1.4.8
-kortex-api @ file:///C:/Users/Admin/Downloads/kortex_api-2.7.0.post5-py3-none-any.whl#sha256=212bbb28c286c2c29261879946711d31891b3d2357050837c0ca7db98de2ae57
+kortex-api @ ./kortex_api-2.7.0.post5-py3-none-any.whl
 matplotlib==3.10.3
 mediapipe==0.10.10
 ml_dtypes==0.5.1
