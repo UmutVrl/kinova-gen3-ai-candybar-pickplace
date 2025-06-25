@@ -151,7 +151,7 @@ See envirnemnet.yml (conda) & requirements.txt <br />
 [Google Colab MediaPipe Model Example](https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/tutorials/object_detection/Object_Detection_for_3_dogs.ipynb) <br />
 [Google MediaPipe Solutions Guide](https://ai.google.dev/edge/mediapipe/solutions/guide) <br />
 [Label Studio](https://labelstud.io/) <br />
-[Training AI Object Detection Model (YouTube)](https://www.youtube.com/watch?v=vODSFXEP-XY) <br />
+[Training AI Object Detection Model (YouTube)](https://www.youtube.com/watch?v=X9554zNNtEY) <br />
 
 ## License & Acknowledgement
 
