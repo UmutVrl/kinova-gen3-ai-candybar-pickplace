@@ -1,0 +1,35 @@
+name: KinovaGen3_04_Integration
+channels:
+  - defaults
+dependencies:
+  - bzip2=1.0.8
+  - ca-certificates=2025.2.25
+  - libffi=3.4.4
+  - openssl=3.0.16
+  - pip=25.1
+  - python=3.11.11
+  - setuptools=78.1.1
+  - sqlite=3.45.3
+  - tk=8.6.14
+  - vc=14.42
+  - vs2015_runtime=14.42.34433
+  - wheel=0.45.1
+  - xz=5.6.4
+  - zlib=1.2.13
+  - pip:
+      - deprecated==1.2.7
+      - kortex-api==2.7.0.post5
+      - numpy==2.2.6
+      - opencv-contrib-python==4.11.0.86
+      - opencv-python==4.11.0.86
+      - pandas==2.3.0
+      - protobuf==3.20.0
+      - python-dateutil==2.9.0.post0
+      - pytz==2025.2
+      - scipy==1.15.3
+      - six==1.17.0
+      - style==1.1.0
+      - tzdata==2025.2
+      - update==0.0.1
+      - wrapt==1.17.2
+prefix: C:\ProgramData\anaconda3\envs\KinovaGen3_04_Integration
