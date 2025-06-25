@@ -40,7 +40,7 @@ Use 02b_camera_calibration.py to evaluate calibration quality. The script comput
 4. ArUco Marker Validation
 Run 03_aruco_tester.py to validate calibration using ArUco markers. The script detects specified ArUco markers, estimates their pose, and measures distances between them and to the camera. Visual feedback is provided by drawing markers and lines on the camera stream.
 
-[SCREENSHOT HERE]
+![](https://github.com/UmutVrl/kinova-gen3-ai-candybar-pickplace/blob/main/media/aruco_calibration_test.jpg)
 
 ## 02_Transformation
 This folder contains scripts for transforming object positions detected by the Kinova Gen3 robotic arm’s camera into real-world and robot base coordinates. The main goal is to accurately estimate the 3D pose of objects (such as ArUco markers or target items) in the robot’s workspace, enabling precise pick-and-place operations.
@@ -64,8 +64,6 @@ Applying kinematic transformations to compute the object’s position in the wor
 4. Target Coordinate Capture
 03_target_get_coordinates_screenshot.py automates the process of capturing the camera feed, detecting the target (e.g., a candy bar or marker), and saving its computed world coordinates for later use in robotic manipulation.
 
-
-[SCREENSHOT HERE]
 
 ## 03_Mediapipe_AI_Framework
 
@@ -98,7 +96,7 @@ Use the exported .tflite model and label file in the robot’s AI framework for 
 The training environment must be Google Colab due to dependency and compatibility constraints. Running locally may cause errors. The dataset should be well-labeled and organized in COCO format for best results. The model uses a MobileNet backbone optimized for edge devices like the Kinova Gen3’s onboard computer.
 
 
-[SCREENSHOT HERE]
+![](https://github.com/UmutVrl/kinova-gen3-ai-candybar-pickplace/blob/main/media/labeling.jpg)
 
 ## 04_Integration
 
@@ -132,8 +130,6 @@ Calibration: The entire integration depends on precise camera calibration. Even 
 Manual Adjustment: The vertical offset (dz) often needs to be manually fine-tuned for your specific setup. This compensates for differences in camera mounting, table height, or object thickness, and is a normal part of deploying vision-guided robotics. <br />
 
 Reusability: Always use the calibration files generated in 01_Calibration and 03_pixel_to_cm_calibration.py. These files ensure consistency and reproducibility across sessions and between different machines or environments6. <br />
-
-[SCREENSHOT HERE]
 
 ## Requirements
 Kinova Gen3 robotic arm with Vision module <br />
