@@ -104,7 +104,7 @@ The Integration stage is where all the core components—camera calibration, coo
 2. Process Skeleton
   02_skeleton.py provides a visual and logical outline of the entire pick-and-place workflow, including initialization, movement, detection, and cleanup. Use this as a reference for understanding or modifying the integration logic.<br />
 3. Pixel-to-Centimeter Calibration
-  Run 03_pixel_to_cm_calibration.py to calibrate the pixel-to-real-world (cm) ratio using ArUco markers. This step is essential for translating detected object positions (in pixels) to actual robot movement commands.
+  Run 03_pixel_to_cm_calibration.py to calibrate the pixel-to-real-world (cm) ratio using ArUco markers. This step is essential for translating detected object positions (in pixels) to actual robot movement commands. <br />
   Note: Manual adjustment of the vertical offset (dz) is often required to fine-tune the robot’s end-effector height, compensating for small calibration errors or setup differences. Precise calibration here directly impacts the accuracy and reliability of the pick-and-place operation.<br />
 4. Finally, Main Integration Script
   04_integration_main.py brings together all previous modules:
@@ -115,7 +115,9 @@ The Integration stage is where all the core components—camera calibration, coo
 
 ### Important Notes
 Calibration: The entire integration depends on precise camera calibration. Even small errors in camera intrinsics or pixel-to-cm ratio can cause the robot to miss or improperly grasp the object. <br />
+
 Manual Adjustment: The vertical offset (dz) often needs to be manually fine-tuned for your specific setup. This compensates for differences in camera mounting, table height, or object thickness, and is a normal part of deploying vision-guided robotics. <br />
+
 Reusability: Always use the calibration files generated in 01_Calibration and 03_pixel_to_cm_calibration.py. These files ensure consistency and reproducibility across sessions and between different machines or environments6. <br />
 
 [SCREENSHOT HERE]
