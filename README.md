@@ -29,7 +29,6 @@ Use 02b_camera_calibration.py to evaluate calibration quality. The script comput
 4. ArUco Marker Validation
 Run 03_aruco_tester.py to validate calibration using ArUco markers. The script detects specified ArUco markers, estimates their pose, and measures distances between them and to the camera. Visual feedback is provided by drawing markers and lines on the camera stream.
 
-### Further Learning
 
 ## 02_Transformation
 This folder contains scripts for transforming object positions detected by the Kinova Gen3 robotic arm’s camera into real-world and robot base coordinates. The main goal is to accurately estimate the 3D pose of objects (such as ArUco markers or target items) in the robot’s workspace, enabling precise pick-and-place operations.
@@ -89,6 +88,12 @@ The training environment must be Google Colab due to dependency and compatibilit
 The model uses a MobileNet backbone optimized for edge devices like the Kinova Gen3’s onboard computer.
 
 References & Further Learning
+
+https://www.kinovarobotics.com/product/gen3-robots
+
+https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
+https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html
+
 https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/tutorials/object_detection/Object_Detection_for_3_dogs.ipynb
 https://ai.google.dev/edge/mediapipe/solutions/guide
 https://www.youtube.com/watch?v=vODSFXEP-XY
