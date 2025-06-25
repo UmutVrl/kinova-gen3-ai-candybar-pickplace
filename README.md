@@ -96,8 +96,6 @@ Use the exported .tflite model and label file in the robot’s AI framework for 
 The training environment must be Google Colab due to dependency and compatibility constraints. Running locally may cause errors. The dataset should be well-labeled and organized in COCO format for best results. The model uses a MobileNet backbone optimized for edge devices like the Kinova Gen3’s onboard computer.
 
 
-![](https://github.com/UmutVrl/kinova-gen3-ai-candybar-pickplace/blob/main/media/labeling.jpg)
-
 ## 04_Integration
 
 ### Overview
