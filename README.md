@@ -15,18 +15,21 @@ Unlike traditional robotics workflows that rely on static, pre-programmed positi
 
 
 ## 01_Calibration
+
 ### Overview
 This folder contains all scripts and resources required for calibrating the Kinova Gen3 robotic arm’s vision system. Accurate camera calibration is essential for reliable object detection, pose estimation, and precise robotic manipulation. The calibration process ensures that the camera’s intrinsic parameters (such as focal length, principal point, and distortion coefficients) are accurately determined. This is critical for tasks like object detection, 3D localization, and robot-to-camera transformations. Workflow includes:
 Taking timed screenshots from the robot’s camera for calibration data collection.
 Performing chessboard-based camera calibration.
 Evaluating calibration quality and undistorting images.
 Testing calibration using ArUco markers for spatial validation.
+
 ### Folder Structure & Scripts
 01_screenshot_taker_with_timer.py	Captures timed screenshots from the Kinova camera stream to collect calibration images. <br />
 02_camera_calibration.py	Performs camera calibration using chessboard images and saves intrinsic parameters. <br />
 02b_camera_calibration.py	Evaluates calibration quality: computes reprojection error and undistorts sample images. <br />
 03_aruco_tester.py	Tests calibration by detecting ArUco markers, estimating their pose, and measuring distances. <br />
 resources/	Contains calibration images and chessboard/ArUco marker files.
+
 ### Calibration Workflow
 1. Image Collection
 Use 01_screenshot_taker_with_timer.py to capture images from the Kinova camera at regular intervals. Images are saved in the resources/calibration_screenshot directory. Collect images from different angles and positions for robust calibration.
@@ -41,12 +44,15 @@ Run 03_aruco_tester.py to validate calibration using ArUco markers. The script d
 
 ## 02_Transformation
 This folder contains scripts for transforming object positions detected by the Kinova Gen3 robotic arm’s camera into real-world and robot base coordinates. The main goal is to accurately estimate the 3D pose of objects (such as ArUco markers or target items) in the robot’s workspace, enabling precise pick-and-place operations.
+
 ### Overview
 Pose estimation and coordinate transformation are critical for robotic manipulation tasks. By detecting ArUco markers in the camera image, the scripts compute the marker’s 3D position relative to the camera, then transform this position into the robot’s world (base) coordinate system. This enables the robot to interact with objects based on vision feedback, rather than relying on hardcoded positions.
+
 ### Folder Structure & Scripts
 01_pose_estimation.py	Detects ArUco markers in the camera feed and estimates their 3D pose relative to the camera. <br />
 02_world_coordinates.py	Transforms detected marker/object positions from camera coordinates to robot/world frame, using robot kinematics and extrinsic parameters. <br />
 03_target_get_coordinates_screenshot.py	Captures screenshots and computes the world coordinates of detected targets for pick-and-place. <br />
+
 ### Transformation Workflow
 1. Pose Estimation with ArUco Markers
 01_pose_estimation.py detects ArUco markers in the camera stream and estimates their position and orientation (pose) in the camera coordinate system using OpenCV’s ArUco module. The script uses previously saved camera calibration parameters for accurate 3D localization.
@@ -62,8 +68,10 @@ Applying kinematic transformations to compute the object’s position in the wor
 [SCREENSHOT HERE]
 
 ## 03_Mediapipe_AI_Framework
+
 ### Overview
 This section focuses on training a custom object detection model using MediaPipe Model Maker on Google Colab. The trained model enables the Kinova robot to detect the candy bar in real-time, which is essential for the pick-and-place task. Due to dependencies and environment requirements, the training code is designed to run in Google Colab rather than local IDEs like PyCharm.
+
 ### Contents
 Model Training Notebook (Google Colab)
 A Python notebook/script that:
@@ -78,12 +86,14 @@ Model Folder
     - label.txt — label file mapping class IDs to names.
 Training and Validation Data Folders
   - Sample images used for training and validation, labeled with tools such as Label Studio.
+
 ### Usage
 Training:
-Upload the training scripts and dataset folders to Google Colab and run the notebook to train the model.
-The notebook installs required dependencies (tensorflow, mediapipe-model-maker) and uses MediaPipe’s API for training.
+Upload the training scripts and dataset folders to Google Colab and run the notebook to train the model. The notebook installs required dependencies (tensorflow, mediapipe-model-maker) and uses MediaPipe’s API for training. <br />
+
 Deployment:
-Use the exported .tflite model and label file in the robot’s AI framework for real-time candy bar detection.
+Use the exported .tflite model and label file in the robot’s AI framework for real-time candy bar detection. <br />
+
 ### Important Notes
 The training environment must be Google Colab due to dependency and compatibility constraints. Running locally may cause errors. The dataset should be well-labeled and organized in COCO format for best results. The model uses a MobileNet backbone optimized for edge devices like the Kinova Gen3’s onboard computer.
 
@@ -91,13 +101,16 @@ The training environment must be Google Colab due to dependency and compatibilit
 [SCREENSHOT HERE]
 
 ## 04_Integration
+
 ### Overview
 The Integration stage is where all the core components—camera calibration, coordinate transformation, and object detection—come together to enable the Kinova Gen3 robot to autonomously detect, localize, and manipulate a candy bar using a custom-trained MediaPipe model. This folder contains scripts for testing the object detector, calibrating pixel-to-centimeter ratios, running the main pick-and-place logic, and a process skeleton for workflow reference.
+
 ### Folder Structure & Scripts
 01_object_detector_test.py	Tests the MediaPipe object detection model on the camera stream and visualizes detections. <br />
 02_skeleton.py	Outlines the high-level workflow for the pick-and-place process, from initialization to shutdown. <br />
 03_pixel_to_cm_calibration.py	Calibrates the pixel-to-centimeter ratio using ArUco markers, crucial for accurate physical movement. <br />
 04_integration_main.py	The main script: integrates detection, coordinate transformation, and robot control for autonomous pick-and-place. <br />
+
 ### Integration Workflow
 1. Object Detection Test
   Use 01_object_detector_test.py to verify that the MediaPipe model correctly detects the candy bar in the camera feed. This step ensures your AI model is working before integrating with the robot. <br />
