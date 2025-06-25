@@ -11,7 +11,7 @@ Project Candybar showcases the dynamic integration of AI-based object detection 
     
 Unlike traditional robotics workflows that rely on static, pre-programmed positions, this project leverages AI to enable dynamic, vision-guided manipulation. The object detection model was trained with custom-labeled data (using tools like Label Studio) and deployed in a way that allows the robot to adapt to new object locations and orientations in real time. All code, calibration data, and models are organized to facilitate reproducibility and adaptation for other AI-driven robotics tasks.
 
-[VIDEO HERE]
+![](https://github.com/UmutVrl/kinova-gen3-ai-candybar-pickplace/blob/main/media/candybar_seq.gif)
 
 
 ## 01_Calibration
