@@ -86,6 +86,10 @@ Training and Validation Data Folders
   - Sample images used for training and validation, labeled with tools such as Label Studio.
 
 ### Usage
+Labeling: Use Label Studio to annotate images for object detection <br />
+
+![](https://github.com/UmutVrl/kinova-gen3-ai-candybar-pickplace/blob/main/media/labeling.jpg)
+
 Training:
 Upload the training scripts and dataset folders to Google Colab and run the notebook to train the model. The notebook installs required dependencies (tensorflow, mediapipe-model-maker) and uses MediaPipe’s API for training. <br />
 
@@ -110,6 +114,9 @@ The Integration stage is where all the core components—camera calibration, coo
 ### Integration Workflow
 1. Object Detection Test
   Use 01_object_detector_test.py to verify that the MediaPipe model correctly detects the candy bar in the camera feed. This step ensures your AI model is working before integrating with the robot. <br />
+
+![](https://github.com/UmutVrl/kinova-gen3-ai-candybar-pickplace/blob/main/media/object_detection.jpg)
+  
 2. Process Skeleton
   02_skeleton.py provides a visual and logical outline of the entire pick-and-place workflow, including initialization, movement, detection, and cleanup. Use this as a reference for understanding or modifying the integration logic.<br />
 3. Pixel-to-Centimeter Calibration
@@ -121,6 +128,8 @@ The Integration stage is where all the core components—camera calibration, coo
     - Uses transformation logic from 02_Transformation to convert detected object positions to robot coordinates.
     - Applies the custom MediaPipe model from 03_Mediapipe_AI_Framework for object detection.
     - Controls the Kinova Gen3 arm to pick up and drop the detected candy bar.
+
+![](https://github.com/UmutVrl/kinova-gen3-ai-candybar-pickplace/blob/main/media/candybar_seq.gif)
 
 ### Important Notes
 Calibration: The entire integration depends on precise camera calibration. Even small errors in camera intrinsics or pixel-to-cm ratio can cause the robot to miss or improperly grasp the object. <br />
