@@ -129,14 +129,13 @@ See envirnemnet.yml (conda) & requirements.txt
 
 ## References & Further Learning
 
-Kinova Gen3: https://www.kinovarobotics.com/product/gen3-robots
-Opencv_calibration: https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
-Opencv_aruco: https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html
-Google_Colab: https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/tutorials/object_detection/Object_Detection_for_3_dogs.ipynb
-Google_Mediapipe: https://ai.google.dev/edge/mediapipe/solutions/guide
-Label Studio: https://labelstud.io/
-Training AI object_detection model: https://www.youtube.com/watch?v=vODSFXEP-XY
-
+[Kinova Gen3](https://www.kinovarobotics.com/product/gen3-robots)
+[OpenCV Camera Calibration Tutorial](https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html)
+[OpenCV ArUco Detection Tutorial](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html)
+[Google Colab MediaPipe Model Example](https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/tutorials/object_detection/Object_Detection_for_3_dogs.ipynb)
+[Google MediaPipe Solutions Guide](https://ai.google.dev/edge/mediapipe/solutions/guide)
+[Label Studio](https://labelstud.io/)
+[Training AI Object Detection Model (YouTube)](https://www.youtube.com/watch?v=vODSFXEP-XY)
 
 ## License & Acknowledgement
 
@@ -145,7 +144,6 @@ KISS is funded by the German Federal Ministry of Education and Research and brin
 For more about KISS, visit: https://www.projekt-kiss.net/
 
 License:
-This repository is released under the GPL-3.0 license.
-See LICENSE for details.
+This repository is released under the GPL-3.0 license. See the LICENSE file for details.
 
 
