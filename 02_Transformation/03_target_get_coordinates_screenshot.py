@@ -236,7 +236,7 @@ def print_all_poses(feed, camera_pose, marker_pos, marker_rot=None):
     print(f"  Y = {camera_pose[1,3]:.3f}")
     print(f"  Z = {camera_pose[2,3]:.3f}")
     # Extract Euler angles from rotation matrix (assuming 'zyx' order, degrees)
-    cam_rot = R.from_matrix(camera_pose[:3,:3]).as_euler('zyx', degrees=True)  # check
+    cam_rot = R.from_matrix(camera_pose[:3,:3]).as_euler('xyz', degrees=True)  # check
     print("Camera Orientation (deg):")
     print(f"  Rx = {cam_rot[2]:.3f}")
     print(f"  Ry = {cam_rot[1]:.3f}")
