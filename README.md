@@ -29,7 +29,7 @@ Use 02b_camera_calibration.py to evaluate calibration quality. The script comput
 4. ArUco Marker Validation
 Run 03_aruco_tester.py to validate calibration using ArUco markers. The script detects specified ArUco markers, estimates their pose, and measures distances between them and to the camera. Visual feedback is provided by drawing markers and lines on the camera stream.
 
-### Further Links
+### Further Learning
 
 ## 02_Transformation
 This folder contains scripts for transforming object positions detected by the Kinova Gen3 robotic arm’s camera into real-world and robot base coordinates. The main goal is to accurately estimate the 3D pose of objects (such as ArUco markers or target items) in the robot’s workspace, enabling precise pick-and-place operations.
@@ -54,7 +54,45 @@ Pose estimation and coordinate transformation are critical for robotic manipulat
 4. Target Coordinate Capture
 03_target_get_coordinates_screenshot.py automates the process of capturing the camera feed, detecting the target (e.g., a candy bar or marker), and saving its computed world coordinates for later use in robotic manipulation.
 
-### Further Links
+### Further Learning
+
+## 03_Mediapipe_AI_Framework
+
+#Overview
+This section focuses on training a custom object detection model using MediaPipe Model Maker on Google Colab. The trained model enables the Kinova robot to detect the candy bar in real-time, which is essential for the pick-and-place task. Due to dependencies and environment requirements, the training code is designed to run in Google Colab rather than local IDEs like PyCharm.
+
+### Contents
+Model Training Notebook (Google Colab)
+A Python notebook/script that:
+  Prepares training and validation datasets labeled in COCO format.
+  Loads datasets using MediaPipe’s object_detector.Dataset.
+  Trains a MobileNet-based object detection model.
+  Evaluates model performance.
+  Exports the trained TensorFlow Lite model (.tflite).
+Model Folder
+  Contains the exported model files:
+    candybar_object_detectionmodel.tflite — the trained TensorFlow Lite model.
+    label.txt — label file mapping class IDs to names.
+Training and Validation Data Folders
+  Sample images used for training and validation, labeled with tools such as Label Studio.
+
+### Usage
+Training:
+Upload the training scripts and dataset folders to Google Colab and run the notebook to train the model.
+The notebook installs required dependencies (tensorflow, mediapipe-model-maker) and uses MediaPipe’s API for training.
+Deployment:
+Use the exported .tflite model and label file in the robot’s AI framework for real-time candy bar detection.
+
+### Important Notes
+The training environment must be Google Colab due to dependency and compatibility constraints. Running locally may cause errors. The dataset should be well-labeled and organized in COCO format for best results.
+
+The model uses a MobileNet backbone optimized for edge devices like the Kinova Gen3’s onboard computer.
+
+References & Further Learning
+https://colab.research.google.com/github/googlesamples/mediapipe/blob/main/tutorials/object_detection/Object_Detection_for_3_dogs.ipynb
+https://ai.google.dev/edge/mediapipe/solutions/guide
+https://www.youtube.com/watch?v=vODSFXEP-XY
+
 
 
 
