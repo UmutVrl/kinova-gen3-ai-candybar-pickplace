@@ -1,12 +1,14 @@
 
 # Project Candybar
 
-This project is part of the KISS (Künstliche Intelligenz Services & Systeme) initiative, a collaborative effort led by Hochschule Furtwangen and Hochschule für Musik Trossingen, and funded by the German Federal Ministry of Education and Research. KISS aims to advance the application of artificial intelligence (AI) across diverse domains—including cognitive robotics, smart production, autonomous systems, health technologies, and music—by developing both foundational modules and practical demonstrators.<br />
+This project is part of the KISS (Künstliche Intelligenz Services & Systeme) initiative, a collaborative effort led by Hochschule Furtwangen and Hochschule für Musik Trossingen, and funded by the German Federal Ministry of Education and Research. KISS aims to advance the application of artificial intelligence (AI) across diverse domains—including cognitive robotics, smart production, autonomous systems, health technologies, and music—by developing both foundational modules and practical demonstrators.
+
 Project Candybar showcases the dynamic integration of AI-based object detection with robotic manipulation. Using the Kinova Gen3 robotic arm equipped with a vision module, this project demonstrates a complete pipeline:
   - Camera calibration for precise vision,
   - Real-time object detection using a custom-trained MediaPipe model,
   - 3D pose estimation and coordinate transformation,
-  - Closed-loop pick-and-place of a candy bar. <br />
+  - Closed-loop pick-and-place of a candy bar.
+    
 Unlike traditional robotics workflows that rely on static, pre-programmed positions, this project leverages AI to enable dynamic, vision-guided manipulation. The object detection model was trained with custom-labeled data (using tools like Label Studio) and deployed in a way that allows the robot to adapt to new object locations and orientations in real time. All code, calibration data, and models are organized to facilitate reproducibility and adaptation for other AI-driven robotics tasks.
 
 [VIDEO HERE]
@@ -63,19 +65,19 @@ Applying kinematic transformations to compute the object’s position in the wor
 ### Overview
 This section focuses on training a custom object detection model using MediaPipe Model Maker on Google Colab. The trained model enables the Kinova robot to detect the candy bar in real-time, which is essential for the pick-and-place task. Due to dependencies and environment requirements, the training code is designed to run in Google Colab rather than local IDEs like PyCharm.
 ### Contents
-Model Training Notebook (Google Colab)
+Model Training Notebook (Google Colab) 
 A Python notebook/script that:
-  Prepares training and validation datasets labeled in COCO format.
-  Loads datasets using MediaPipe’s object_detector.Dataset.
-  Trains a MobileNet-based object detection model.
-  Evaluates model performance.
-  Exports the trained TensorFlow Lite model (.tflite).
+  - Prepares training and validation datasets labeled in COCO format.
+  - Loads datasets using MediaPipe’s object_detector.Dataset.
+  - Trains a MobileNet-based object detection model.
+  - Evaluates model performance.
+  - Exports the trained TensorFlow Lite model (.tflite).
 Model Folder
   Contains the exported model files:
-    candybar_object_detectionmodel.tflite — the trained TensorFlow Lite model.
-    label.txt — label file mapping class IDs to names.
+    - candybar_object_detectionmodel.tflite — the trained TensorFlow Lite model.
+    - label.txt — label file mapping class IDs to names.
 Training and Validation Data Folders
-  Sample images used for training and validation, labeled with tools such as Label Studio.
+  - Sample images used for training and validation, labeled with tools such as Label Studio.
 ### Usage
 Training:
 Upload the training scripts and dataset folders to Google Colab and run the notebook to train the model.
@@ -106,10 +108,10 @@ Pixel-to-Centimeter Calibration
   Note: Manual adjustment of the vertical offset (dz) is often required to fine-tune the robot’s end-effector height, compensating for small calibration errors or setup differences. Precise calibration here directly impacts the accuracy and reliability of the pick-and-place operation.
 Finally, Main Integration Script
   04_integration_main.py brings together all previous modules:
-    Loads calibration parameters from 01_Calibration (camera intrinsics, distortion coefficients).
-    Uses transformation logic from 02_Transformation to convert detected object positions to robot coordinates.
-    Applies the custom MediaPipe model from 03_Mediapipe_AI_Framework for object detection.
-    Controls the Kinova Gen3 arm to pick up and drop the detected candy bar.
+    - Loads calibration parameters from 01_Calibration (camera intrinsics, distortion coefficients).
+    - Uses transformation logic from 02_Transformation to convert detected object positions to robot coordinates.
+    - Applies the custom MediaPipe model from 03_Mediapipe_AI_Framework for object detection.
+    - Controls the Kinova Gen3 arm to pick up and drop the detected candy bar.
 
 ### Important Notes
 Calibration: The entire integration depends on precise camera calibration. Even small errors in camera intrinsics or pixel-to-cm ratio can cause the robot to miss or improperly grasp the object.
@@ -120,12 +122,12 @@ Reusability: Always use the calibration files generated in 01_Calibration and 03
 [SCREENSHOT HERE]
 
 ##Requirements
-Kinova Gen3 robotic arm with Vision module
-Calibrated camera parameters (calibration_data.pkl)
-Pixel-to-cm calibration file (pixel_to_cm_calibration.pkl)
-Trained MediaPipe object detection model (candybar_objectdetection_model.tflite)
-Python 3.11, OpenCV 4.11, MediaPipe 0.10.10, Kinova Kortex API 2.7.0
-See envirnemnet.yml (conda) & requirements.txt 
+Kinova Gen3 robotic arm with Vision module <br />
+Calibrated camera parameters (calibration_data.pkl)<br />
+Pixel-to-cm calibration file (pixel_to_cm_calibration.pkl)<br />
+Trained MediaPipe object detection model (candybar_objectdetection_model.tflite)<br />
+Python 3.11, OpenCV 4.11, MediaPipe 0.10.10, Kinova Kortex API 2.7.0<br />
+See envirnemnet.yml (conda) & requirements.txt <br />
 
 ## References & Further Learning
 
