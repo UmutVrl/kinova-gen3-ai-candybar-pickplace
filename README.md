@@ -22,10 +22,10 @@ Performing chessboard-based camera calibration.
 Evaluating calibration quality and undistorting images.
 Testing calibration using ArUco markers for spatial validation.
 ### Folder Structure & Scripts
-01_screenshot_taker_with_timer.py	Captures timed screenshots from the Kinova camera stream to collect calibration images.
-02_camera_calibration.py	Performs camera calibration using chessboard images and saves intrinsic parameters.
-02b_camera_calibration.py	Evaluates calibration quality: computes reprojection error and undistorts sample images.
-03_aruco_tester.py	Tests calibration by detecting ArUco markers, estimating their pose, and measuring distances.
+01_screenshot_taker_with_timer.py	Captures timed screenshots from the Kinova camera stream to collect calibration images. <br />
+02_camera_calibration.py	Performs camera calibration using chessboard images and saves intrinsic parameters. <br />
+02b_camera_calibration.py	Evaluates calibration quality: computes reprojection error and undistorts sample images. <br />
+03_aruco_tester.py	Tests calibration by detecting ArUco markers, estimating their pose, and measuring distances. <br />
 resources/	Contains calibration images and chessboard/ArUco marker files.
 ### Calibration Workflow
 1. Image Collection
@@ -44,9 +44,9 @@ This folder contains scripts for transforming object positions detected by the K
 ### Overview
 Pose estimation and coordinate transformation are critical for robotic manipulation tasks. By detecting ArUco markers in the camera image, the scripts compute the marker’s 3D position relative to the camera, then transform this position into the robot’s world (base) coordinate system. This enables the robot to interact with objects based on vision feedback, rather than relying on hardcoded positions.
 ### Folder Structure & Scripts
-01_pose_estimation.py	Detects ArUco markers in the camera feed and estimates their 3D pose relative to the camera.
-02_world_coordinates.py	Transforms detected marker/object positions from camera coordinates to robot/world frame, using robot kinematics and extrinsic parameters.
-03_target_get_coordinates_screenshot.py	Captures screenshots and computes the world coordinates of detected targets for pick-and-place.
+01_pose_estimation.py	Detects ArUco markers in the camera feed and estimates their 3D pose relative to the camera. <br />
+02_world_coordinates.py	Transforms detected marker/object positions from camera coordinates to robot/world frame, using robot kinematics and extrinsic parameters. <br />
+03_target_get_coordinates_screenshot.py	Captures screenshots and computes the world coordinates of detected targets for pick-and-place. <br />
 ### Transformation Workflow
 1. Pose Estimation with ArUco Markers
 01_pose_estimation.py detects ArUco markers in the camera stream and estimates their position and orientation (pose) in the camera coordinate system using OpenCV’s ArUco module. The script uses previously saved camera calibration parameters for accurate 3D localization.
@@ -65,7 +65,7 @@ Applying kinematic transformations to compute the object’s position in the wor
 ### Overview
 This section focuses on training a custom object detection model using MediaPipe Model Maker on Google Colab. The trained model enables the Kinova robot to detect the candy bar in real-time, which is essential for the pick-and-place task. Due to dependencies and environment requirements, the training code is designed to run in Google Colab rather than local IDEs like PyCharm.
 ### Contents
-Model Training Notebook (Google Colab) 
+Model Training Notebook (Google Colab)
 A Python notebook/script that:
   - Prepares training and validation datasets labeled in COCO format.
   - Loads datasets using MediaPipe’s object_detector.Dataset.
@@ -94,10 +94,10 @@ The training environment must be Google Colab due to dependency and compatibilit
 ### Overview
 The Integration stage is where all the core components—camera calibration, coordinate transformation, and object detection—come together to enable the Kinova Gen3 robot to autonomously detect, localize, and manipulate a candy bar using a custom-trained MediaPipe model. This folder contains scripts for testing the object detector, calibrating pixel-to-centimeter ratios, running the main pick-and-place logic, and a process skeleton for workflow reference.
 ### Folder Structure & Scripts
-01_object_detector_test.py	Tests the MediaPipe object detection model on the camera stream and visualizes detections.
-02_skeleton.py	Outlines the high-level workflow for the pick-and-place process, from initialization to shutdown.
-03_pixel_to_cm_calibration.py	Calibrates the pixel-to-centimeter ratio using ArUco markers, crucial for accurate physical movement.
-04_integration_main.py	The main script: integrates detection, coordinate transformation, and robot control for autonomous pick-and-place.
+01_object_detector_test.py	Tests the MediaPipe object detection model on the camera stream and visualizes detections. <br />
+02_skeleton.py	Outlines the high-level workflow for the pick-and-place process, from initialization to shutdown. <br />
+03_pixel_to_cm_calibration.py	Calibrates the pixel-to-centimeter ratio using ArUco markers, crucial for accurate physical movement. <br />
+04_integration_main.py	The main script: integrates detection, coordinate transformation, and robot control for autonomous pick-and-place. <br />
 ### Integration Workflow
 Object Detection Test
   Use 01_object_detector_test.py to verify that the MediaPipe model correctly detects the candy bar in the camera feed. This step ensures your AI model is working before integrating with the robot.
@@ -114,9 +114,9 @@ Finally, Main Integration Script
     - Controls the Kinova Gen3 arm to pick up and drop the detected candy bar.
 
 ### Important Notes
-Calibration: The entire integration depends on precise camera calibration. Even small errors in camera intrinsics or pixel-to-cm ratio can cause the robot to miss or improperly grasp the object.
-Manual Adjustment: The vertical offset (dz) often needs to be manually fine-tuned for your specific setup. This compensates for differences in camera mounting, table height, or object thickness, and is a normal part of deploying vision-guided robotics46.
-Reusability: Always use the calibration files generated in 01_Calibration and 03_pixel_to_cm_calibration.py. These files ensure consistency and reproducibility across sessions and between different machines or environments6.
+Calibration: The entire integration depends on precise camera calibration. Even small errors in camera intrinsics or pixel-to-cm ratio can cause the robot to miss or improperly grasp the object. <br />
+Manual Adjustment: The vertical offset (dz) often needs to be manually fine-tuned for your specific setup. This compensates for differences in camera mounting, table height, or object thickness, and is a normal part of deploying vision-guided robotics. <br />
+Reusability: Always use the calibration files generated in 01_Calibration and 03_pixel_to_cm_calibration.py. These files ensure consistency and reproducibility across sessions and between different machines or environments6. <br />
 
 
 [SCREENSHOT HERE]
