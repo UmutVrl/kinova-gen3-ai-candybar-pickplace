@@ -1,6 +1,8 @@
 
 # Project Candybar
-Below is a draft README section for your 01_Calibration folder, summarizing its purpose, workflow, and the scripts it contains. This will help users understand the calibration process for the Kinova Gen3 robotic arm’s camera and how each script fits into the workflow.
+
+This current project os a part of KISS (https://www.projekt-kiss.net/). it aims to use AI de--
+
 
 ## 01_Calibration
 This folder contains all scripts and resources required for calibrating the Kinova Gen3 robotic arm’s vision system. Accurate camera calibration is essential for reliable object detection, pose estimation, and precise robotic manipulation.
@@ -53,13 +55,10 @@ Pose estimation and coordinate transformation are critical for robotic manipulat
 4. Target Coordinate Capture
 03_target_get_coordinates_screenshot.py automates the process of capturing the camera feed, detecting the target (e.g., a candy bar or marker), and saving its computed world coordinates for later use in robotic manipulation.
 
-### Further Learning
 
 ## 03_Mediapipe_AI_Framework
-
-#Overview
+### Overview
 This section focuses on training a custom object detection model using MediaPipe Model Maker on Google Colab. The trained model enables the Kinova robot to detect the candy bar in real-time, which is essential for the pick-and-place task. Due to dependencies and environment requirements, the training code is designed to run in Google Colab rather than local IDEs like PyCharm.
-
 ### Contents
 Model Training Notebook (Google Colab)
 A Python notebook/script that:
@@ -74,7 +73,6 @@ Model Folder
     label.txt — label file mapping class IDs to names.
 Training and Validation Data Folders
   Sample images used for training and validation, labeled with tools such as Label Studio.
-
 ### Usage
 Training:
 Upload the training scripts and dataset folders to Google Colab and run the notebook to train the model.
@@ -83,11 +81,11 @@ Deployment:
 Use the exported .tflite model and label file in the robot’s AI framework for real-time candy bar detection.
 
 ### Important Notes
-The training environment must be Google Colab due to dependency and compatibility constraints. Running locally may cause errors. The dataset should be well-labeled and organized in COCO format for best results.
+The training environment must be Google Colab due to dependency and compatibility constraints. Running locally may cause errors. The dataset should be well-labeled and organized in COCO format for best results. The model uses a MobileNet backbone optimized for edge devices like the Kinova Gen3’s onboard computer.
 
-The model uses a MobileNet backbone optimized for edge devices like the Kinova Gen3’s onboard computer.
 
-References & Further Learning
+
+## References & Further Learning
 
 https://www.kinovarobotics.com/product/gen3-robots
 
