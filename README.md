@@ -3,10 +3,10 @@
 
 This project is part of the KISS (Künstliche Intelligenz Services & Systeme) initiative, a collaborative effort led by Hochschule Furtwangen and Hochschule für Musik Trossingen, and funded by the German Federal Ministry of Education and Research. KISS aims to advance the application of artificial intelligence (AI) across diverse domains—including cognitive robotics, smart production, autonomous systems, health technologies, and music—by developing both foundational modules and practical demonstrators.<br />
 Project Candybar showcases the dynamic integration of AI-based object detection with robotic manipulation. Using the Kinova Gen3 robotic arm equipped with a vision module, this project demonstrates a complete pipeline:
-  -Camera calibration for precise vision,
-  -Real-time object detection using a custom-trained MediaPipe model,
-  -3D pose estimation and coordinate transformation,
-  -Closed-loop pick-and-place of a candy bar. <br />
+  - Camera calibration for precise vision,
+  - Real-time object detection using a custom-trained MediaPipe model,
+  - 3D pose estimation and coordinate transformation,
+  - Closed-loop pick-and-place of a candy bar. <br />
 Unlike traditional robotics workflows that rely on static, pre-programmed positions, this project leverages AI to enable dynamic, vision-guided manipulation. The object detection model was trained with custom-labeled data (using tools like Label Studio) and deployed in a way that allows the robot to adapt to new object locations and orientations in real time. All code, calibration data, and models are organized to facilitate reproducibility and adaptation for other AI-driven robotics tasks.
 
 [VIDEO HERE]
