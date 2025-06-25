@@ -99,14 +99,14 @@ The Integration stage is where all the core components—camera calibration, coo
 03_pixel_to_cm_calibration.py	Calibrates the pixel-to-centimeter ratio using ArUco markers, crucial for accurate physical movement. <br />
 04_integration_main.py	The main script: integrates detection, coordinate transformation, and robot control for autonomous pick-and-place. <br />
 ### Integration Workflow
-Object Detection Test
+1. Object Detection Test
   Use 01_object_detector_test.py to verify that the MediaPipe model correctly detects the candy bar in the camera feed. This step ensures your AI model is working before integrating with the robot.
-Process Skeleton
+2. Process Skeleton
   02_skeleton.py provides a visual and logical outline of the entire pick-and-place workflow, including initialization, movement, detection, and cleanup. Use this as a reference for understanding or modifying the integration logic.
-Pixel-to-Centimeter Calibration
+3 .Pixel-to-Centimeter Calibration
   Run 03_pixel_to_cm_calibration.py to calibrate the pixel-to-real-world (cm) ratio using ArUco markers. This step is essential for translating detected object positions (in pixels) to actual robot movement commands.
   Note: Manual adjustment of the vertical offset (dz) is often required to fine-tune the robot’s end-effector height, compensating for small calibration errors or setup differences. Precise calibration here directly impacts the accuracy and reliability of the pick-and-place operation.
-Finally, Main Integration Script
+4. Finally, Main Integration Script
   04_integration_main.py brings together all previous modules:
     - Loads calibration parameters from 01_Calibration (camera intrinsics, distortion coefficients).
     - Uses transformation logic from 02_Transformation to convert detected object positions to robot coordinates.
