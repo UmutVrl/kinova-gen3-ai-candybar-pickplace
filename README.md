@@ -29,17 +29,20 @@ Use 02b_camera_calibration.py to evaluate calibration quality. The script comput
 4. ArUco Marker Validation
 Run 03_aruco_tester.py to validate calibration using ArUco markers. The script detects specified ArUco markers, estimates their pose, and measures distances between them and to the camera. Visual feedback is provided by drawing markers and lines on the camera stream.
 
+### Further Links
+
 ## 02_Transformation
 This folder contains scripts for transforming object positions detected by the Kinova Gen3 robotic arm’s camera into real-world and robot base coordinates. The main goal is to accurately estimate the 3D pose of objects (such as ArUco markers or target items) in the robot’s workspace, enabling precise pick-and-place operations.
+
 ### Overview
 Pose estimation and coordinate transformation are critical for robotic manipulation tasks. By detecting ArUco markers in the camera image, the scripts compute the marker’s 3D position relative to the camera, then transform this position into the robot’s world (base) coordinate system. This enables the robot to interact with objects based on vision feedback, rather than relying on hardcoded positions.
 
-# Folder Structure & Scripts
+### Folder Structure & Scripts
 01_pose_estimation.py	Detects ArUco markers in the camera feed and estimates their 3D pose relative to the camera.
 02_world_coordinates.py	Transforms detected marker/object positions from camera coordinates to robot/world frame, using robot kinematics and extrinsic parameters.
 03_target_get_coordinates_screenshot.py	Captures screenshots and computes the world coordinates of detected targets for pick-and-place.
 
-# Transformation Workflow
+### Transformation Workflow
 1. Pose Estimation with ArUco Markers
 01_pose_estimation.py detects ArUco markers in the camera stream and estimates their position and orientation (pose) in the camera coordinate system using OpenCV’s ArUco module. The script uses previously saved camera calibration parameters for accurate 3D localization.
 2. Coordinate Transformation
@@ -50,4 +53,8 @@ Pose estimation and coordinate transformation are critical for robotic manipulat
    Applying kinematic transformations to compute the object’s position in the world frame.
 4. Target Coordinate Capture
 03_target_get_coordinates_screenshot.py automates the process of capturing the camera feed, detecting the target (e.g., a candy bar or marker), and saving its computed world coordinates for later use in robotic manipulation.
+
+### Further Links
+
+
 
