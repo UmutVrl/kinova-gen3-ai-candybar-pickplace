@@ -145,6 +145,7 @@ Pixel-to-cm calibration file (pixel_to_cm_calibration.pkl)<br />
 Trained MediaPipe object detection model (candybar_objectdetection_model.tflite)<br />
 Python 3.11, OpenCV 4.11, MediaPipe 0.10.10, Kinova Kortex API 2.7.0<br />
 <ins>See environment.yml (conda) & requirements.txt</ins>
+pip install -r requirements.txt
 
 ## References & Further Learning
 
